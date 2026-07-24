@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>경주 취향 테스트 & 코스 추천</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .question-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 15px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            background-color: #fafbfc;
+        }
+
+        .radio-label:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        input[type="radio"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        input[type="radio"]:checked+span {
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        select,
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(52, 152, 219, 0.3);
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .course-header {
+            text-align: center;
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #b6d4fe;
+        }
+
+        .course-header h3 {
+            margin: 0;
+            color: #084298;
+        }
+
+        .result-item {
+            border-left: 5px solid #ccc;
+            background: #fdfdfd;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .rank-course {
+            border-left-color: #3498db;
+            background: #fff;
+        }
+
+        .rank-alt {
+            border-left-color: #95a5a6;
+            opacity: 0.8;
+        }
+
+        .result-item h3 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+        }
+
+        .score-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .match-rate {
+            font-weight: bold;
+            float: right;
+            font-size: 1.1em;
+            color: #e74c3c;
+        }
+
+        .time-badge {
+            display: inline-block;
+            background: #f1c40f;
+            color: #333;
+            font-size: 0.8em;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>🧭 경주 맞춤형 코스 생성기</h2>
+
+    <div class="card">
+        <h3>📍 기본 일정 정보</h3>
+        <div class="form-group">
+            <label>선호 권역 (Hard Filter)</label>
+            <select id="region">
+                <option value="ALL">전체 권역 (상관없음)</option>
+                <option value="DOMESTIC_CORE">도심·북부 역사 권역 (황리단길, 대릉원, 읍성, 양동마을 등)</option>
+                <option value="BOMUN_LEISURE">보문단지 레저 권역 (보문호, 경주타워, 경주월드 등)</option>
+                <option value="BULGUK_TOHAM">불국사·토함산 산사 권역 (불국사, 석굴암, 토함산)</option>
+                <option value="EAST_SEA_COAST">동해안 해양 권역 (문무대왕릉, 주상절리, 감포항 등)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>사용 가능 시간 (시간)</label>
+            <input type="number" id="duration" step="0.5" min="1.0" max="12" value="4">
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="question-title">Q1. 여행지에 도착한 지 30분, 당신의 마음속 생각은?</div>
+        <div class="radio-group"><label class="radio-label"><input type="radio" name="q1" value="A"><span>"빨리 저기 끝까지
+                    가보자! 구석구석 다 둘러봐야지"</span></label><label class="radio-label"><input type="radio" name="q1"
+                    value="B"><span>"유명한 맛집이나 핫한 카페부터 찾아볼까?"</span></label><label class="radio-label"><input
+                    type="radio" name="q1" value="C"><span>"일단 저기 한적한 곳에 앉아서 여유 좀 부려볼까?"</span></label></div>
+    </div>
+    <div class="card">
+        <div class="question-title">Q2. 길을 걷다가 문득 마음에 드는 잔잔한 풍경을 발견했을 때 당신의 행동은?</div>
+        <div class="radio-group"><label class="radio-label"><input type="radio" name="q2" value="A"><span>"이건 찍어야 해!
+                    인생샷을 건질 때까지 셔터를 누른다"</span></label><label class="radio-label"><input type="radio" name="q2"
+                    value="B"><span>"가만히 서서 눈으로 담으며 고즈넉한 분위기를 온전히 즐긴다"</span></label><label class="radio-label"><input
+                    type="radio" name="q2" value="C"><span>"오 예쁘다! (쿨하게 감상하고) 자, 다음 코스로 빠르게 이동!"</span></label></div>
+    </div>
+    <div class="card">
+        <div class="question-title">Q3. 가파른 오르막길이나 거대한 액티비티 시설을 눈앞에 두었을 때 당신은?</div>
+        <div class="radio-group"><label class="radio-label"><input type="radio" name="q3" value="A"><span>"여행은 체력전! 당연히
+                    끝까지 올라가고 체험해 봐야지!"</span></label><label class="radio-label"><input type="radio" name="q3"
+                    value="B"><span>"올라가면 풍경은 좋겠네... 천천히 쉬엄쉬엄 올라가 본다"</span></label><label class="radio-label"><input
+                    type="radio" name="q3" value="C"><span>"굳이 땀 빼기 싫어... 난 밑에 있는 카페에서 기다릴게"</span></label></div>
+    </div>
+    <div class="card">
+        <div class="question-title">Q4. 저녁 식사와 야간 일정을 정할 시간입니다. 당신의 선택은?</div>
+        <div class="radio-group"><label class="radio-label"><input type="radio" name="q4" value="A"><span>"사람 많고 핫한 식당이나
+                    펍! 여행의 텐션을 올려보자!"</span></label><label class="radio-label"><input type="radio" name="q4"
+                    value="B"><span>"조명 켜진 고즈넉한 야경 명소나 뷰가 좋은 조용한 곳"</span></label><label class="radio-label"><input
+                    type="radio" name="q4" value="C"><span>"피곤하다. 편하게 숙소 근처에서 대충 먹거나 포장해서 쉬자"</span></label></div>
+    </div>
+    <div class="card">
+        <div class="question-title">Q5. 유명한 역사 유적지에 도착했습니다. 당신의 관람 스타일은?</div>
+        <div class="radio-group"><label class="radio-label"><input type="radio" name="q5" value="A"><span>"안내문 꼼꼼히 읽고,
+                    부지 구석구석 역사적 흔적을 탐방한다."</span></label><label class="radio-label"><input type="radio" name="q5"
+                    value="B"><span>"제일 유명한 메인 포토존에서 인증샷만 딱 찍고 시원한 카페로 간다."</span></label><label
+                class="radio-label"><input type="radio" name="q5" value="C"><span>"역사적 의미도 좋지만, 발길 닿는 대로 천천히 걸으며 분위기만
+                    즐긴다."</span></label></div>
+    </div>
+
+    <button onclick="recommend()">추천 코스 생성하기</button>
+
+    <div id="resultArea" style="display:none; margin-top:20px;">
+        <div class="course-header" id="courseSummary"></div>
+        <div id="courseResults"></div>
+
+        <h4 style="margin-top:30px; color:#7f8c8d;">💡 시간이 부족해 코스에 들어가지 못한 다음 순위 장소들</h4>
+        <div id="altResults"></div>
+    </div>
+
+    <script>
+        // 장소의 '메타 데이터(권역, 소요시간)'만 남겨둡니다. 
+        // 5축(rest, explore 등)은 이제 서버가 알아서 하므로 지워도 무방하지만 호환성을 위해 두셔도 됩니다.
+        const spots = [
+            {name: "첨성대", region: "DOMESTIC_CORE", duration: 0.5},
+            {name: "대릉원", region: "DOMESTIC_CORE", duration: 1.5},
+            {name: "동궁과 월지", region: "DOMESTIC_CORE", duration: 1.0},
+            {name: "월정교", region: "DOMESTIC_CORE", duration: 0.5},
+            {name: "경주읍성", region: "DOMESTIC_CORE", duration: 0.5},
+            {name: "교촌한옥마을", region: "DOMESTIC_CORE", duration: 1.0},
+            {name: "황리단길", region: "DOMESTIC_CORE", duration: 2.0},
+            {name: "분황사 모전석탑", region: "DOMESTIC_CORE", duration: 0.5},
+            {name: "양동마을", region: "DOMESTIC_CORE", duration: 2.5},
+            {name: "불국사", region: "BULGUK_TOHAM", duration: 1.5},
+            {name: "석굴암", region: "BULGUK_TOHAM", duration: 1.0},
+            {name: "토함산", region: "BULGUK_TOHAM", duration: 2.5},
+            {name: "보문호", region: "BOMUN_LEISURE", duration: 1.5},
+            {name: "경주동궁원", region: "BOMUN_LEISURE", duration: 1.5},
+            {name: "경주엑스포대공원 경주타워", region: "BOMUN_LEISURE", duration: 2.0},
+            {name: "경주월드 외관", region: "BOMUN_LEISURE", duration: 3.0}, // 이름 서버와 동일하게 맞춤
+            {name: "문무대왕릉", region: "EAST_SEA_COAST", duration: 0.5},
+            {name: "감은사지 삼층석탑", region: "EAST_SEA_COAST", duration: 0.5},
+            {name: "주상절리 파도소리길", region: "EAST_SEA_COAST", duration: 1.5},
+            {name: "감포항", region: "EAST_SEA_COAST", duration: 1.0}
+        ];
+
+        // async 키워드를 붙여서 비동기 API 통신이 가능하게 합니다.
+        async function recommend() {
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            const q2 = document.querySelector('input[name="q2"]:checked');
+            const q3 = document.querySelector('input[name="q3"]:checked');
+            const q4 = document.querySelector('input[name="q4"]:checked');
+            const q5 = document.querySelector('input[name="q5"]:checked');
+
+            if (!q1 || !q2 || !q3 || !q4 || !q5) {
+                alert("5개의 질문에 모두 답해주세요!");
+                return;
+            }
+
+            // 버튼 텍스트 변경 및 로딩 효과
+            const btn = document.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ AI가 취향을 분석하고 코스를 짜는 중...";
+            btn.disabled = true;
+
+            try {
+                // 1. FastAPI 서버로 보낼 데이터 준비 (모든 장소 점수를 받기 위해 top_n=20)
+                const requestData = {
+                    q1: q1.value, q2: q2.value, q3: q3.value, q4: q4.value, q5: q5.value,
+                    top_n: 20,
+                    alpha: 0.4
+                };
+
+                // 2. FastAPI 서버 호출 (포트 번호 8000 주의)
+                const response = await fetch("http://127.0.0.1:8000/recommend", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) throw new Error("서버 응답에 문제가 있습니다.");
+
+                const apiData = await response.json();
+                const aiScores = apiData.recommendations; // [{place: "양동마을", score: 0.84}, ...]
+
+                // 3. UI 필터링 값 가져오기
+                const selectedRegion = document.getElementById('region').value;
+                const maxDuration = parseFloat(document.getElementById('duration').value);
+
+                // 4. 권역 필터링 및 AI 점수 매핑
+                let filteredSpots = spots.filter(spot => {
+                    return selectedRegion === 'ALL' || spot.region === selectedRegion;
+                });
+
+                filteredSpots = filteredSpots.map(spot => {
+                    // API 결과에서 해당 장소의 AI 유사도 점수 찾기
+                    const aiSpot = aiScores.find(item => item.place === spot.name);
+
+                    // API 점수는 0~1 사이이므로 100점 만점 퍼센트로 변환 (예: 0.8459 -> 85)
+                    let similarity = aiSpot ? Math.round(aiSpot.score * 100) : 0;
+
+                    return {...spot, similarity: similarity};
+                });
+
+                // 5. AI 점수 순으로 내림차순 정렬
+                filteredSpots.sort((a, b) => b.similarity - a.similarity);
+
+                // 6. 시간(Duration) 조건에 맞춰 최종 코스와 남은 코스 분리
+                let finalCourse = [];
+                let altCourse = [];
+                let accumulatedTime = 0;
+
+                for (let i = 0; i < filteredSpots.length; i++) {
+                    let spot = filteredSpots[i];
+                    if (accumulatedTime + spot.duration <= maxDuration) {
+                        finalCourse.push(spot);
+                        accumulatedTime += spot.duration;
+                    } else {
+                        altCourse.push(spot);
+                    }
+                }
+
+                if (finalCourse.length === 0) {
+                    alert(`선택하신 시간(${maxDuration}시간) 내에 즐길 수 있는 장소가 없습니다. 시간을 늘려주세요!`);
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+
+                // 7. 화면에 렌더링
+                const resultArea = document.getElementById('resultArea');
+                const courseSummary = document.getElementById('courseSummary');
+                const courseResults = document.getElementById('courseResults');
+                const altResultsDiv = document.getElementById('altResults');
+
+                courseResults.innerHTML = "";
+                altResultsDiv.innerHTML = "";
+                resultArea.style.display = "block";
+
+                courseSummary.innerHTML = `
+                    <h3>총 ${maxDuration}시간 중 <span style="color:#e74c3c;">${accumulatedTime}시간</span> 알차게 채운 코스!</h3>
+                    <p style="margin:5px 0 0 0; font-size:0.9em;">AI가 분석한 취향 찰떡 <b>${finalCourse.length}곳</b>으로 코스를 만들었어요.</p>
+                `;
+
+                for (let i = 0; i < finalCourse.length; i++) {
+                    let spot = finalCourse[i];
+                    courseResults.innerHTML += `
+                        <div class="result-item rank-course">
+                            <span class="match-rate">${spot.similarity}% 일치</span>
+                            <div class="time-badge">예상 ${spot.duration}시간</div>
+                            <h3>${i + 1}번째 방문: ${spot.name}</h3>
+                            <div class="score-info">📍 <b>권역:</b> ${spot.region}</div>
+                        </div>
+                    `;
+                }
+
+                const maxAlt = Math.min(3, altCourse.length);
+                for (let i = 0; i < maxAlt; i++) {
+                    let spot = altCourse[i];
+                    altResultsDiv.innerHTML += `
+                        <div class="result-item rank-alt">
+                            <span style="float:right; font-size:0.9em;">${spot.similarity}% 일치</span>
+                            <div class="time-badge" style="background:#bdc3c7;">예상 ${spot.duration}시간</div>
+                            <h3 style="color:#7f8c8d;">${spot.name}</h3>
+                        </div>
+                    `;
+                }
+
+                resultArea.scrollIntoView({behavior: 'smooth'});
+
+            } catch (error) {
+                console.error("API 연동 에러:", error);
+                alert("서버와 통신하는 중 문제가 발생했습니다. (API 서버가 켜져 있는지 확인해주세요!)");
+            } finally {
+                // 버튼 원상복구
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>
